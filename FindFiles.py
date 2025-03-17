@@ -72,8 +72,14 @@ def main(page: ft.Page):
 
         # Add each key-value pair dynamically
         for key, value in all_files.items():
-            file_info = f"{key}: {value['filename']}"  # Format as "Key: Value"
-            file_list.controls.append(ft.Text(file_info, color="white"))
+            file_list.controls.append(
+                ft.Text(
+                    spans=[
+                        ft.TextSpan(f"{key}: ", weight="bold", color="red"),  # 🔴 Bold red key
+                        ft.TextSpan(f"{value}", color="white"),  # ⚪ White value
+                    ]
+                )
+            )
 
         page.update()  # Refresh UI
 
