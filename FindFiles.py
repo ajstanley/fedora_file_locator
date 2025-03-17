@@ -1,18 +1,35 @@
+#!/usr/bin/env python3
+
 import flet as ft
 import FoxmlWorker as FW
 import hashlib
 import urllib.parse
 
+
 def dereference(identifier: str) -> str:
-    """Identifies object and datastream location within Fedora objectStores and datastreamStore."""
+    # Replace '+' with '/' in the identifier
     slashed = identifier.replace('+', '/')
     full = f"info:fedora/{slashed}"
+
+    # Generate the MD5 hash of the full string
     hash_value = hashlib.md5(full.encode('utf-8')).hexdigest()
 
-    # Generate directory structure
-    subbed = f"{hash_value[:2]}/{hash_value[2:4]}/{hash_value[4:]}"
+    # Pattern to fill with hash (similar to the `##` placeholder)
+    subbed = "##"
 
-    # URL encode the full string
+    # Replace the '#' characters in `subbed` with the corresponding characters from `hash_value`
+    hash_offset = 0
+    pattern_offset = 0
+    result = list(subbed)
+
+    while pattern_offset < len(result) and hash_offset < len(hash_value):
+        if result[pattern_offset] == '#':
+            result[pattern_offset] = hash_value[hash_offset]
+            hash_offset += 1
+        pattern_offset += 1
+
+    subbed = ''.join(result)
+    # URL encode the full string, replacing '_' with '%5F'
     encoded = urllib.parse.quote(full, safe='').replace('_', '%5F')
     return f"{subbed}/{encoded}"
 
