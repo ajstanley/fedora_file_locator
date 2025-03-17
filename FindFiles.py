@@ -90,4 +90,4 @@ def main(page: ft.Page):
         )
     )
 
-ft.app(target=main)
+ft.app(target=main, host="0.0.0.0", port=8551)
