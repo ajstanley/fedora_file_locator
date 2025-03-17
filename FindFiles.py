@@ -5,6 +5,7 @@ import FoxmlWorker as FW
 import hashlib
 import urllib.parse
 
+
 def dereference(identifier: str) -> str:
     # Replace '+' with '/' in the identifier
     slashed = identifier.replace('+', '/')
@@ -26,6 +27,7 @@ def dereference(identifier: str) -> str:
     # URL encode the full string, replacing '_' with '%5F'
     encoded = urllib.parse.quote(full, safe='').replace('_', '%5F')
     return f"{subbed}/{encoded}"
+
 
 def main(page: ft.Page):
     data_dir = "/usr/local/fedora/data"
@@ -57,13 +59,29 @@ def main(page: ft.Page):
         """Update the labels based on the entered PID."""
         path = dereference(text)
         foxml = f"{data_dir}/objectStore/{path}"
-        foxml_path.value = f"Foxml Path: {foxml}"
+        foxml_path.value = ""
+        foxml_path.value = ""
+        foxml_path.spans = [
+            ft.TextSpan(
+                "Foxml Path: ",
+                style=ft.TextStyle(color="red", weight="bold")
+            ),
+            ft.TextSpan(
+                foxml,
+                style=ft.TextStyle(color="white")
+            ),
+        ]
 
         try:
             fw = FW.FWorker(foxml)  # Attempt to load Fedora object
             all_files = fw.get_file_data()
         except Exception as e:
-            foxml_path.value = f"Error loading FOXML: {str(e)}"
+            foxml_path.spans = [
+                ft.TextSpan("Error loading FOXML: ", style=ft.TextStyle(color="red", weight="bold")),
+                ft.TextSpan(str(e), style=ft.TextStyle(color="white")),
+            ]
+            file_list.controls.clear()
+            file_list.controls.append(ft.Text("No files found.", color="red"))
             page.update()
             return
 
@@ -91,15 +109,17 @@ def main(page: ft.Page):
         page.update()  # Refresh UI
 
     # Layout
-    # Layout
     page.add(
         ft.Column(
             [
                 ft.Container(content=input_text, bgcolor="#37474f", border_radius=10, height=50, padding=10),
-                ft.Container(content=ft.Column([foxml_path, file_list]), padding=10),  # ✅ Add file_list here
+                ft.Container(content=foxml_path, padding=ft.Padding(bottom=15)),
+                # 🛑 Adds extra space below `foxml_path`
+                ft.Container(content=file_list, padding=10),  # ✅ Add file_list here
             ],
             spacing=20,
         )
     )
+
 
 ft.app(target=main, host="0.0.0.0", port=8551)
