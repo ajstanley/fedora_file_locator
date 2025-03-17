@@ -33,8 +33,8 @@ def main(page: ft.Page):
 
     # Styling
     page.bgcolor = "#2d2d2d"
-    page.window_width = 350
-    page.window_height = 600
+    page.window.width = 350
+    page.window.height = 600
     page.padding = 10
 
     # Input field
@@ -49,8 +49,9 @@ def main(page: ft.Page):
 
     # Labels output
     foxml_path = ft.Text("", color="white")
-    obj_path = ft.Text("", color="white")
-    pdf_path = ft.Text("", color="white")
+    # Container to display file details dynamically
+    global file_list  # Ensure it can be accessed in update_labels()
+    file_list = ft.Column([], spacing=5)  # Initializes an empty column
 
     def update_labels(text):
         """Update the labels based on the entered PID."""
@@ -63,28 +64,26 @@ def main(page: ft.Page):
             all_files = fw.get_file_data()
         except Exception as e:
             foxml_path.value = f"Error loading FOXML: {str(e)}"
-            obj_path.value = "OBJ file: N/A"
-            pdf_path.value = "PDF file: N/A"
             page.update()
-            return  # Exit function early if loading fails
+            return
 
-        obj = all_files.get('OBJ')
-        obj_path.value = f"Path to OBJ: {dereference(obj['filename'])}" if obj else "No OBJ file found."
+        # Clear old file entries
+        file_list.controls.clear()\
 
-        pdf = all_files.get('PDF')
-        pdf_path.value = f"Path to PDF: {dereference(pdf['filename'])}" if pdf else "No PDF file found."
+        # Add each key-value pair dynamically
+        for key, value in all_files.items():
+            file_info = f"{key}: {value['filename']}"  # Format as "Key: Value"
+            file_list.controls.append(ft.Text(file_info, color="white"))
 
         page.update()  # Refresh UI
 
+    # Layout
     # Layout
     page.add(
         ft.Column(
             [
                 ft.Container(content=input_text, bgcolor="#37474f", border_radius=10, height=50, padding=10),
-                ft.Container(
-                    content=ft.Column([foxml_path, obj_path, pdf_path], spacing=10),
-                    padding=10,
-                ),
+                ft.Container(content=ft.Column([foxml_path, file_list]), padding=10),  # ✅ Add file_list here
             ],
             spacing=20,
         )
