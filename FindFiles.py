@@ -72,16 +72,17 @@ def main(page: ft.Page):
 
         # Add each key-value pair dynamically
         for key, value in all_files.items():
+            file_path = dereference(value['filename'])
             file_list.controls.append(
                 ft.Text(
                     spans=[
                         ft.TextSpan(
                             f"{key}: ",
-                            style=ft.TextStyle(color="red", font_weight="bold")  # 🔴 Bold red key
+                            style=ft.TextStyle(color="red", weight="bold")
                         ),
                         ft.TextSpan(
-                            f"{value}",
-                            style=ft.TextStyle(color="white")  # ⚪ White value
+                            f"{file_path}",
+                            style=ft.TextStyle(color="white")
                         ),
                     ]
                 )
