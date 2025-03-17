@@ -68,15 +68,21 @@ def main(page: ft.Page):
             return
 
         # Clear old file entries
-        file_list.controls.clear()\
+        file_list.controls.clear()
 
         # Add each key-value pair dynamically
         for key, value in all_files.items():
             file_list.controls.append(
                 ft.Text(
                     spans=[
-                        ft.TextSpan(f"{key}: ", weight="bold", color="red"),  # 🔴 Bold red key
-                        ft.TextSpan(f"{value}", color="white"),  # ⚪ White value
+                        ft.TextSpan(
+                            f"{key}: ",
+                            style=ft.TextStyle(color="red", font_weight="bold")  # 🔴 Bold red key
+                        ),
+                        ft.TextSpan(
+                            f"{value}",
+                            style=ft.TextStyle(color="white")  # ⚪ White value
+                        ),
                     ]
                 )
             )
