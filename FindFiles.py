@@ -5,7 +5,6 @@ import FoxmlWorker as FW
 import hashlib
 import urllib.parse
 
-
 def dereference(identifier: str) -> str:
     # Replace '+' with '/' in the identifier
     slashed = identifier.replace('+', '/')
@@ -27,7 +26,6 @@ def dereference(identifier: str) -> str:
     # URL encode the full string, replacing '_' with '%5F'
     encoded = urllib.parse.quote(full, safe='').replace('_', '%5F')
     return f"{subbed}/{encoded}"
-
 
 def main(page: ft.Page):
     data_dir = "/usr/local/fedora/data"
@@ -90,7 +88,7 @@ def main(page: ft.Page):
 
         # Add each key-value pair dynamically
         for key, value in all_files.items():
-            file_path = dereference(value['filename'])
+            file_path = f"{data_dir}datastreamStore/{dereference(value['filename'])}"
             file_list.controls.append(
                 ft.Text(
                     spans=[
@@ -113,8 +111,7 @@ def main(page: ft.Page):
         ft.Column(
             [
                 ft.Container(content=input_text, bgcolor="#37474f", border_radius=10, height=50, padding=10),
-                ft.Container(content=foxml_path, padding=ft.Padding(bottom=15)),
-                # 🛑 Adds extra space below `foxml_path`
+                ft.Container(content=foxml_path, padding=ft.Padding(left=0, top=0, right=0, bottom=15)),
                 ft.Container(content=file_list, padding=10),  # ✅ Add file_list here
             ],
             spacing=20,
