@@ -5,18 +5,12 @@ import FoxmlWorker as FW
 import hashlib
 import urllib.parse
 
-
 def dereference(identifier: str) -> str:
     # Replace '+' with '/' in the identifier
     slashed = identifier.replace('+', '/')
     full = f"info:fedora/{slashed}"
-
-    # Generate the MD5 hash of the full string
     hash_value = hashlib.md5(full.encode('utf-8')).hexdigest()
-
-    # Pattern to fill with hash (similar to the `##` placeholder)
     subbed = "##"
-
     # Replace the '#' characters in `subbed` with the corresponding characters from `hash_value`
     hash_offset = 0
     pattern_offset = 0
@@ -34,16 +28,29 @@ def dereference(identifier: str) -> str:
     return f"{subbed}/{encoded}"
 
 def main(page: ft.Page):
-    data_dir = "/usr/local/fedora/data/"
+    data_dir = "/usr/local/fedora/data"
     page.title = "Fedora File Finder"
 
+    # Styling
+    page.bgcolor = "#2d2d2d"
+    page.window_width = 350
+    page.window_height = 600
+    page.padding = 10
+
     # Input field
-    input_text = ft.TextField(label="Enter a PID", on_submit=lambda e: update_labels(e.control.value))
+    input_text = ft.TextField(
+        label="Enter a PID",
+        on_submit=lambda e: update_labels(e.control.value),
+        text_size=16,
+        border_radius=10,
+        bgcolor="#455a64",
+        color="white"
+    )
 
     # Labels output
-    foxml_path = ft.Text("")
-    obj_path = ft.Text("")
-    pdf_path = ft.Text("")
+    foxml_path = ft.Text("", color="white")
+    obj_path = ft.Text("", color="white")
+    pdf_path = ft.Text("", color="white")
 
     def update_labels(text):
         """Update the labels based on the entered PID."""
@@ -51,8 +58,15 @@ def main(page: ft.Page):
         foxml = f"{data_dir}/objectStore/{path}"
         foxml_path.value = f"Foxml Path: {foxml}"
 
-        fw = FW.FWorker(foxml)
-        all_files = fw.get_file_data()
+        try:
+            fw = FW.FWorker(foxml)  # Attempt to load Fedora object
+            all_files = fw.get_file_data()
+        except Exception as e:
+            foxml_path.value = f"Error loading FOXML: {str(e)}"
+            obj_path.value = "OBJ file: N/A"
+            pdf_path.value = "PDF file: N/A"
+            page.update()
+            return  # Exit function early if loading fails
 
         obj = all_files.get('OBJ')
         obj_path.value = f"Path to OBJ: {dereference(obj['filename'])}" if obj else "No OBJ file found."
@@ -62,7 +76,18 @@ def main(page: ft.Page):
 
         page.update()  # Refresh UI
 
-    # Adding widgets to the page
-    page.add(input_text, foxml_path, obj_path, pdf_path)
+    # Layout
+    page.add(
+        ft.Column(
+            [
+                ft.Container(content=input_text, bgcolor="#37474f", border_radius=10, height=50, padding=10),
+                ft.Container(
+                    content=ft.Column([foxml_path, obj_path, pdf_path], spacing=10),
+                    padding=10,
+                ),
+            ],
+            spacing=20,
+        )
+    )
 
 ft.app(target=main)
